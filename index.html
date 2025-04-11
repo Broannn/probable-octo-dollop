@@ -61,7 +61,7 @@
             <img id="profilePreview"
                  class="profile-image"
                  src="https://via.placeholder.com/300"
-                 alt="Prévisualisation">
+                 alt="">
             <img id="overlayPreview"
                  class="overlay-image opacity-0"
                  src=""
@@ -137,21 +137,6 @@
               <span id="rotateValue" class="ml-2 text-gray-600">0°</span>
             </div>
           </div>
-          
-          <!-- Filtres avancés -->
-          <div>
-            <label class="block text-secondary font-medium mb-2">
-              3. Options avancées
-            </label>
-            <div class="flex items-center mb-2">
-              <input type="checkbox" id="grayscale" class="mr-2">
-              <label for="grayscale" class="text-gray-600">Niveau de gris</label>
-            </div>
-            <div class="flex items-center">
-              <input type="checkbox" id="invert" class="mr-2">
-              <label for="invert" class="text-gray-600">Inverser les couleurs</label>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -187,8 +172,6 @@
     const zoomValue = document.getElementById('zoomValue');
     const rotateSlider = document.getElementById('rotateSlider');
     const rotateValue = document.getElementById('rotateValue');
-    const grayscaleCheckbox = document.getElementById('grayscale');
-    const invertCheckbox = document.getElementById('invert');
     const downloadBtn = document.getElementById('downloadBtn');
     
     // État
@@ -234,20 +217,18 @@
       overlayPreview.classList.remove('opacity-0');
     }
     
-    // Actualiser l'aperçu (zoom, rotation, filtres)
+    // Actualiser l'aperçu (zoom, rotation)
     function updatePreview() {
       if (!currentImage) return;
       
       const zoom = parseFloat(zoomSlider.value);
       const rotation = rotateSlider.value;
-      const grayscale = grayscaleCheckbox.checked ? 'grayscale(100%)' : 'none';
-      const invert = invertCheckbox.checked ? 'invert(100%)' : 'none';
-      
+
+      // Appliquer les transformations à l’élément <img> d’aperçu
       profilePreview.style.transform = `scale(${zoom}) rotate(${rotation}deg)`;
-      profilePreview.style.filter = `${grayscale} ${invert}`;
     }
     
-    // Listeners pour sliders et checkboxes
+    // Listeners pour sliders
     zoomSlider.addEventListener('input', function() {
       zoomValue.textContent = `${Math.round(this.value * 100)}%`;
       updatePreview();
@@ -256,8 +237,6 @@
       rotateValue.textContent = `${this.value}°`;
       updatePreview();
     });
-    grayscaleCheckbox.addEventListener('change', updatePreview);
-    invertCheckbox.addEventListener('change', updatePreview);
     
     // Téléchargement final
     downloadBtn.addEventListener('click', function() {
@@ -271,20 +250,11 @@
       canvas.height = 300;
       const ctx = canvas.getContext('2d');
       
+      // Positionner le contexte au centre
       ctx.save();
       ctx.translate(150, 150);
       ctx.rotate(parseInt(rotateSlider.value) * Math.PI / 180);
       ctx.scale(parseFloat(zoomSlider.value), parseFloat(zoomSlider.value));
-      
-      // Appliquer le filtrage
-      let filterString = '';
-      if (grayscaleCheckbox.checked) {
-        filterString += 'grayscale(100%) ';
-      }
-      if (invertCheckbox.checked) {
-        filterString += 'invert(100%)';
-      }
-      ctx.filter = filterString.trim();
       
       // Dessiner l'image de profil
       ctx.drawImage(currentImage, -150, -150, 300, 300);
@@ -308,16 +278,6 @@
     updateOverlay();
   });
   </script>
-  
-  <!-- Petit label DeepSite en bas -->
-  <p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px; position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">
-    Made with
-    <img src="https://enzostvs-deepsite.hf.space/logo.svg"
-         alt="DeepSite Logo"
-         style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);">
-    <a href="https://enzostvs-deepsite.hf.space" style="color: #fff; text-decoration: underline;" target="_blank">DeepSite</a>
-    - 🧬
-    <a href="https://enzostvs-deepsite.hf.space?remix=ThunderPhoe/testprofilgen" style="color: #fff;text-decoration: underline;" target="_blank">Remix</a>
-  </p>
+
 </body>
 </html>
