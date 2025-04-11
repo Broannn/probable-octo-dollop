@@ -61,7 +61,7 @@
             <img id="profilePreview"
                  class="profile-image"
                  src="https://via.placeholder.com/300"
-                 alt="">
+                 alt="Prévisualisation">
             <img id="overlayPreview"
                  class="overlay-image opacity-0"
                  src=""
@@ -238,34 +238,41 @@
       updatePreview();
     });
     
-    // Téléchargement final
+    // Téléchargement final (avec cercle)
     downloadBtn.addEventListener('click', function() {
       if (!currentImage) {
         alert("Veuillez d'abord télécharger une image");
         return;
       }
       
+      // Création d'un canvas
       const canvas = document.createElement('canvas');
       canvas.width = 300;
       canvas.height = 300;
       const ctx = canvas.getContext('2d');
       
-      // Positionner le contexte au centre
+      // 1) Définir un chemin circulaire pour tout masquer en dehors du cercle
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(150, 150, 150, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.clip(); // Tout ce qui est en dehors de ce cercle est masqué/transparent
+
+      // 2) Dessiner l'image de profil (avec rotation & zoom)
       ctx.save();
       ctx.translate(150, 150);
       ctx.rotate(parseInt(rotateSlider.value) * Math.PI / 180);
       ctx.scale(parseFloat(zoomSlider.value), parseFloat(zoomSlider.value));
-      
-      // Dessiner l'image de profil
       ctx.drawImage(currentImage, -150, -150, 300, 300);
       ctx.restore();
       
-      // Dessiner l'overlay au-dessus
+      // 3) Dessiner l'overlay (toujours dans le même clip circulaire)
       const overlayImg = new Image();
       overlayImg.onload = function() {
         ctx.drawImage(overlayImg, 0, 0, 300, 300);
+        ctx.restore(); // Sort du clip
         
-        // Download
+        // 4) Télécharger
         const link = document.createElement('a');
         link.download = 'ma-nouvelle-photo-de-profil.png';
         link.href = canvas.toDataURL('image/png');
