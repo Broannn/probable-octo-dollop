@@ -29,8 +29,13 @@
       transition: all 0.3s; border: 2px solid transparent;
     }
     .style-option:hover { transform: scale(1.05); }
-    .style-option.selected { border-color: #C8FB00; box-shadow: 0 0 15px rgba(200, 251, 0, 0.5); }
-    #downloadBtn { transition: all 0.3s; }
+    .style-option.selected {
+      border-color: #C8FB00;
+      box-shadow: 0 0 15px rgba(200, 251, 0, 0.5);
+    }
+    #downloadBtn {
+      transition: all 0.3s;
+    }
     #downloadBtn:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -192,7 +197,19 @@
         const reader = new FileReader();
         reader.onload = function(event) {
           currentImage = new Image();
-          currentImage.onload = updatePreview;
+          currentImage.onload = function() {
+            
+            // *** Approach #2: Always contain the whole 300x300 image in the circle
+            // Force max zoom to 1:
+            zoomSlider.max = 1;
+            
+            // If user had a bigger value, clamp it
+            if (parseFloat(zoomSlider.value) > 1) {
+              zoomSlider.value = 1;
+            }
+            
+            updatePreview();
+          };
           currentImage.src = event.target.result;
           profilePreview.src = event.target.result;
         };
@@ -225,17 +242,13 @@
 
       // Apply transform to the preview <img>
       profilePreview.style.transform = `scale(${zoom}) rotate(${rotation}deg)`;
+      zoomValue.textContent = Math.round(zoom * 100) + '%';
+      rotateValue.textContent = rotation + '°';
     }
     
     // Sliders
-    zoomSlider.addEventListener('input', function() {
-      zoomValue.textContent = `${Math.round(this.value * 100)}%`;
-      updatePreview();
-    });
-    rotateSlider.addEventListener('input', function() {
-      rotateValue.textContent = `${this.value}°`;
-      updatePreview();
-    });
+    zoomSlider.addEventListener('input', updatePreview);
+    rotateSlider.addEventListener('input', updatePreview);
     
     // Final download with circular crop
     downloadBtn.addEventListener('click', function() {
@@ -250,7 +263,7 @@
       canvas.height = 300;
       const ctx = canvas.getContext('2d');
       
-      // 1) Circle path to mask everything outside
+      // 1) Circle path
       ctx.save();
       ctx.beginPath();
       ctx.arc(150, 150, 150, 0, 2 * Math.PI);
@@ -262,6 +275,8 @@
       ctx.translate(150, 150);
       ctx.rotate(parseInt(rotateSlider.value) * Math.PI / 180);
       ctx.scale(parseFloat(zoomSlider.value), parseFloat(zoomSlider.value));
+      
+      // Draw the 300x300 image
       ctx.drawImage(currentImage, -150, -150, 300, 300);
       ctx.restore();
       
